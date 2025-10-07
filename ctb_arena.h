@@ -1,364 +1,364 @@
 #ifndef _CTB_ARENA_H
 #define _CTB_ARENA_H
 
-
-#ifdef __cplusplus extern "C" {
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#ifndef CTB_INTERNALS
-#define CTB_INTERNALS
-
-#if defined(__STDC__)
-	#include <stdint.h>
-	typedef	uint8_t		U8;
-	typedef	uint16_t	U16;
-	typedef	uint32_t	U32;
-	typedef	uint64_t	U64;
-	typedef	int8_t		S8;
-	typedef	int16_t		S16;
-	typedef	int32_t		S32;
-	typedef	int64_t		S64;
-	typedef	float		F32;
-	typedef	double		F64;
-	typedef	uintptr_t	UPTR;
-	typedef	intptr_t	IPTR;
-#else
-	typedef unsigned char		U8;
-	typedef unsigned short		U16;
-	typedef unsigned int		U32;
-	typedef unsigned long long	U64;
-	typedef signed char			S8;
-	typedef signed short		S16;
-	typedef signed int			S32;
-	typedef signed long long	S64;
-	typedef float				F32;
-	typedef double				F64;
-	typedef	unsigned long		UPTR;
-	typedef	long				IPTR;
-#endif
-
-#define CTB_IS_BIT_SET(value, bit)	(((value) >> (bit)) & 1)
-#define CTB_SET_BIT(value, bit)		((value) |= (1ULL << (bit)))
-#define CTB_CLEAR_BIT(value, bit)	((value) &= ~(1ULL << (bit)))
-
-#if defined(CTB_DEBUGPRINT)
-	#if defined(__STDC__)
-		#include <stdio.h>
-		#define CTB_INTERNALS_DEBUGPRINT(...) printf(__VA_ARGS__)
-	#else
-		#define CTB_INTERNALS_DEBUGPRINT(...) ((void)0)
-	#endif
-#else
-	#define CTB_INTERNALS_DEBUGPRINT(...) ((void)0)
-#endif
-
-#endif // NOTE: !CTB_INTERNALS
-
+/* ========================= Configuration =========================
+   Define before including:
+   - CTB_ARENA_STATIC            : make all functions static
+   - CTB_ARENA_DEBUG             : enable debug logs (stderr if libc, else no-op)
+   - CTB_ARENA_USE_LIBC          : use malloc/free/memcpy/memset/strlen
+   - CTB_ARENA_DEFAULT_ALIGNMENT : defaults to sizeof(void*)
+   - CTB_ARENA_DEFAULT_FLAGS     : defaults to (CTB_ARENA_FLAG_USE_HEADER)
+   - CTB_ARENA_MALLOC, CTB_ARENA_FREE,
+     CTB_ARENA_MEMCPY, CTB_ARENA_MEMSET, CTB_ARENA_STRLEN : custom hooks
+   ================================================================= */
 
 #if defined(CTB_ARENA_STATIC)
-	#define	CTB_PUBLICDEC static
-	#define CTB_PUBLICDEF static
+#	define CTB_ARENA_DEC static
+#	define CTB_ARENA_DEF static
 #elif defined(__cplusplus)
-	#define CTB_PUBLICDEC extern "C"
-	#define	CTB_PUBLICDEF extern "C"
+#	define CTB_ARENA_DEC extern "C"
+#	define CTB_ARENA_DEF extern "C"
 #else
-	#define CTB_PUBLICDEC extern
-	#define CTB_PUBLICDEF
+#	define CTB_ARENA_DEC extern
+#	define CTB_ARENA_DEF
 #endif
 
-
-typedef enum ctb_arena_flags
+enum ctb_arena_flags
 {
-	NONE				= 0,
-	MEMSET_ON_RESET		= 1 << 0,
-	USE_HEADER			= 1 << 1
-} ctb_arena_flags;
-
-
-typedef struct ctb_arena ctb_arena;
-struct ctb_arena
-{
-	ctb_arena_flags	flags;
-	ctb_arena		*prev;
-	ctb_arena		*next;
-	U8				*memory;
-	U64				capacity;
-	U64				offset;
+	CTB_ARENA_FLAG_NONE				= 0,
+	CTB_ARENA_FLAG_MEMSET_ON_SET	= 1u << 0, /* zero memory on arena creation */
+	CTB_ARENA_FLAG_MEMSET_ON_RESET	= 1u << 1, /* zero memory on reset */
+	CTB_ARENA_FLAG_USE_HEADER		= 1u << 2  /* store size header before each alloc (for realloc/clear) */
 };
 
-typedef struct
+struct ctb_arena
 {
-	U64	size;
-} ctb_arena_allocation_header;
+	unsigned int		flags;
+	struct ctb_arena*	prev;
+	struct ctb_arena*	next;
+	unsigned char*		memory;
+	unsigned long long	capacity;
+	unsigned long long	offset;
+};
+typedef struct ctb_arena ctb_arena;
 
+struct ctb_arena_allocation_header
+{
+	unsigned long long	size;
+};
 
-CTB_PUBLICDEC	void *ctb_arena_alloc_aligned(ctb_arena *arena, U64 size, U64 alignment);
-CTB_PUBLICDEC	void *ctb_arena_alloc(ctb_arena *arena, U64 size);
-CTB_PUBLICDEC	void *ctb_arena_realloc(ctb_arena *arena, void *old_ptr, U64 new_size);
-CTB_PUBLICDEC	ctb_arena *ctb_arena_create(U64 capacity);
-CTB_PUBLICDEC	ctb_arena *ctb_arena_extend(ctb_arena *arena, U64 size);
-CTB_PUBLICDEC	ctb_arena *ctb_arena_reset(ctb_arena *arena);
-CTB_PUBLICDEC	void ctb_arena_destroy(ctb_arena *arena);
-CTB_PUBLICDEC	ctb_arena *ctb_arena_copy(const ctb_arena *source);
-CTB_PUBLICDEC	char *ctb_arena_strdup(ctb_arena *arena, const char *cstr);
+CTB_ARENA_DEC void*				ctb_arena_alloc_aligned(struct ctb_arena* arena, unsigned long long size,
+														 unsigned long long alignment);
+CTB_ARENA_DEC void*				ctb_arena_alloc(struct ctb_arena* arena, unsigned long long size);
+CTB_ARENA_DEC void*				ctb_arena_realloc(struct ctb_arena* arena, void* old_ptr, unsigned long long new_size);
+CTB_ARENA_DEC struct ctb_arena*	ctb_arena_create(unsigned long long capacity);
+CTB_ARENA_DEC struct ctb_arena*	ctb_arena_extend(struct ctb_arena* arena, unsigned long long capacity);
+CTB_ARENA_DEC struct ctb_arena*	ctb_arena_reset(struct ctb_arena* arena);
+CTB_ARENA_DEC void				ctb_arena_destroy(struct ctb_arena* arena);
+CTB_ARENA_DEC struct ctb_arena*	ctb_arena_copy(const struct ctb_arena* source);
+CTB_ARENA_DEC char*				ctb_arena_strdup(struct ctb_arena* arena, const char* cstr);
 
-CTB_PUBLICDEC	void *ctb_arena_internal_memcpy(void *dest, const void *src, U64 size);
-CTB_PUBLICDEC	void *ctb_arena_internal_memset(void *dest, U8 value, U64 size);
-CTB_PUBLICDEC	U64 ctb_arena_internal_strlen(const char *cstr);
-
+/* Internal helpers are exposed so you can use the header without libc */
+CTB_ARENA_DEC void*				ctb_arena_internal_memcpy(void* dst, const void* src,
+														   unsigned long long n);
+CTB_ARENA_DEC void*				ctb_arena_internal_memset(void* dst, int value,
+														   unsigned long long n);
+CTB_ARENA_DEC unsigned long long	ctb_arena_internal_strlen(const char* s);
 
 #ifdef __cplusplus
-}
+} /* extern "C" */
 #endif
-#endif	// NOTE: !_CTB_ARENA_H
+#endif /* _CTB_ARENA_H */
 
-/*****************************************************************************/
-
+/* ===================================================================== */
+/* ======================= Implementation Section ======================= */
+/* ===================================================================== */
 #ifdef CTB_ARENA_IMPLEMENTATION
 
 #ifndef CTB_ARENA_DEFAULT_ALIGNMENT
-	#define CTB_DEFAULT_ALIGNMENT (sizeof(void*))
+#	define CTB_ARENA_DEFAULT_ALIGNMENT ((unsigned long long)(sizeof(void*)))
 #endif
 
 #ifndef CTB_ARENA_DEFAULT_FLAGS
-	#define CTB_ARENA_DEFAULT_FLAGS (0 | USE_HEADER)
+#	define CTB_ARENA_DEFAULT_FLAGS	(0u | CTB_ARENA_FLAG_USE_HEADER | CTB_ARENA_FLAG_MEMSET_ON_SET | \
+									CTB_ARENA_FLAG_MEMSET_ON_RESET)
 #endif
 
-#ifndef CTB_ARENA_ALLOCATOR
-	#if defined(__STDC__)
-		#include <stdlib.h>
-		#define CTB_ARENA_ALLOCATOR malloc
-	#endif
+#if defined(CTB_ARENA_USE_LIBC)
+#	include <stdlib.h>
+#	include <string.h>
+#	ifndef CTB_ARENA_MALLOC
+#		define CTB_ARENA_MALLOC(sz)        malloc((sz))
+#	endif
+#	ifndef CTB_ARENA_FREE
+#		define CTB_ARENA_FREE(p)           free((p))
+#	endif
+#	ifndef CTB_ARENA_MEMCPY
+#		define CTB_ARENA_MEMCPY(d,s,n)     memcpy((d),(s),(n))
+#	endif
+#	ifndef CTB_ARENA_MEMSET
+#		define CTB_ARENA_MEMSET(d,v,n)     memset((d),(v),(n))
+#	endif
+#	ifndef CTB_ARENA_STRLEN
+#		define CTB_ARENA_STRLEN(s)         ((unsigned long long)strlen((s)))
+#	endif
+#else
+#	ifndef CTB_ARENA_MALLOC
+#		define CTB_ARENA_MALLOC(sz)        0
+#	endif
+#	ifndef CTB_ARENA_FREE
+#		define CTB_ARENA_FREE(p)           ((void)0)
+#	endif
+#	ifndef CTB_ARENA_MEMCPY
+#		define CTB_ARENA_MEMCPY(d,s,n)     ctb_arena_internal_memcpy((d),(s),(n))
+#	endif
+#	ifndef CTB_ARENA_MEMSET
+#		define CTB_ARENA_MEMSET(d,v,n)     ctb_arena_internal_memset((d),(v),(n))
+#	endif
+#	ifndef CTB_ARENA_STRLEN
+#		define CTB_ARENA_STRLEN(s)         ctb_arena_internal_strlen((s))
+#	endif
 #endif
 
-#if defined(__STDC__)
-	#include <stdlib.h>
-	#include <string.h>
+#if defined(CTB_ARENA_DEBUG) && defined(CTB_ARENA_USE_LIBC)
+#	include <stdio.h>
+#	define CTB_ARENA_DLOG(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
+#else
+#	define CTB_ARENA_DLOG(...) ((void)0)
 #endif
 
 
-CTB_PUBLICDEF
-ctb_arena	*ctb_arena_create(U64 capacity)
+static int ctb__is_pow2_ull(unsigned long long a) { return a && ((a & (a - 1u)) == 0u); }
+
+static unsigned long long ctb__align_up_ull(unsigned long long x, unsigned long long a)
 {
-	ctb_arena	*arena = CTB_ARENA_ALLOCATOR(sizeof(ctb_arena));
-	if (!arena)
+	if (!ctb__is_pow2_ull(a))
 	{
-		return 0;
+		unsigned long long r = x % a;
+		return r ? (x + (a - r)) : x;
 	}
-	arena->flags = CTB_ARENA_DEFAULT_FLAGS;
-	arena->prev = 0;
-	arena->next = 0;
-	arena->offset = 0;
+	unsigned long long m = a - 1u;
+	return (x + m) & ~m;
+}
+
+CTB_ARENA_DEF
+struct ctb_arena* ctb_arena_create(unsigned long long capacity)
+{
+	struct ctb_arena* arena = (struct ctb_arena*)CTB_ARENA_MALLOC(sizeof(struct ctb_arena));
+	if (!arena) return 0;
+	arena->flags    = CTB_ARENA_DEFAULT_FLAGS;
+	arena->prev     = 0;
+	arena->next     = 0;
+	arena->offset   = 0;
 	arena->capacity = capacity;
-	arena->memory = CTB_ARENA_ALLOCATOR(capacity);
+	arena->memory   = (unsigned char*)CTB_ARENA_MALLOC(capacity);
 	if (!arena->memory)
 	{
-		free(arena);
+		CTB_ARENA_FREE(arena);
 		return 0;
 	}
-	CTB_INTERNALS_DEBUGPRINT("[ARENA] ctb_arena_create: arena of %llub capacity successfully created at %p\n", capacity, (void*)arena);
+	if (arena->flags & CTB_ARENA_FLAG_MEMSET_ON_SET) CTB_ARENA_MEMSET(arena->memory, 0, arena->capacity);
+	CTB_ARENA_DLOG("[arena] create cap=%llu @%p\n", capacity, (void*)arena);
 	return arena;
 }
 
-CTB_PUBLICDEF
-ctb_arena *ctb_arena_extend(ctb_arena *arena, U64 size)
+CTB_ARENA_DEF
+struct ctb_arena* ctb_arena_extend(struct ctb_arena* arena, unsigned long long capacity)
 {
 	if (!arena) return 0;
-	ctb_arena	*new_arena	= ctb_arena_create(size);
-	if (!new_arena)
-	{
-		CTB_INTERNALS_DEBUGPRINT("[ARENA] ctb_arena_extend: allocation failed [FAIL]\n");
-		return (ctb_arena *)0;
+	while (arena->next) arena = arena->next;
+	struct ctb_arena* seg = ctb_arena_create(capacity);
+	if (!seg) {
+		CTB_ARENA_DLOG("[arena] extend failed\n");
+		return 0;
 	}
-	new_arena->flags = arena->flags;
-	while (arena->next)
-	{
-		arena = arena->next;
-	}
-	arena->next = new_arena;
-	new_arena->prev = arena;
-	CTB_INTERNALS_DEBUGPRINT("[ARENA] ctb_arena_extend: arena %p extended, new segment at %p\n", (void*)arena, (void*)new_arena);
-	return new_arena;
+	seg->flags = arena->flags;
+	arena->next = seg;
+	seg->prev = arena;
+	CTB_ARENA_DLOG("[arena] extend base=%p new=%p cap=%llu\n", (void*)arena, (void*)seg, capacity);
+	return seg;
 }
 
 
-CTB_PUBLICDEF
-void *ctb_arena_alloc_aligned(ctb_arena *arena, U64 size, U64 alignment)
+CTB_ARENA_DEF
+void* ctb_arena_alloc_aligned(struct ctb_arena* arena, unsigned long long size, unsigned long long alignment)
 {
-	if (!arena) return 0;
-	U64 header_size = CTB_IS_BIT_SET(arena->flags, USE_HEADER) ? sizeof(ctb_arena_allocation_header) : 0;
-	while (arena)
-	{
-		UPTR current = (UPTR)(arena->memory + arena->offset);
-		UPTR aligned = (current + alignment - 1 + header_size) & ~(UPTR)(alignment - 1);
-		U64 padding = aligned - current;
-		U64 total = size + padding;
+	if (!arena) { return 0; }
+	if (alignment == 0) alignment = 1;
 
-		if (arena->offset + total <= arena->capacity)
+	unsigned long long header_size =
+		(arena->flags & CTB_ARENA_FLAG_USE_HEADER)
+		? (unsigned long long)sizeof(struct ctb_arena_allocation_header)
+		: 0ull;
+
+	for (; arena; arena = arena->next)
+	{
+		unsigned long long base       = (unsigned long long)(arena->memory + arena->offset);
+		unsigned long long user_start = ctb__align_up_ull(base + header_size, alignment);
+		if (user_start < base)		{ return 0; }
+		unsigned long long padding = user_start - base;
+		if (padding > ~0ULL - size)	{ return 0; }
+		unsigned long long total = padding + size;
+		if (total <= arena->capacity - arena->offset)
 		{
-			void *ptr = arena->memory + arena->offset + padding;
-			ctb_arena_allocation_header header = { .size = size };
-			memcpy((U8*)ptr - header_size, &header, header_size);
+			unsigned char* user_ptr = arena->memory + arena->offset + padding;
+
+			if (header_size)
+			{
+				struct ctb_arena_allocation_header h;
+				h.size = size;
+				CTB_ARENA_MEMCPY((void*)(user_ptr - header_size), &h, header_size);
+			}
+
 			arena->offset += total;
-			CTB_INTERNALS_DEBUGPRINT("[ARENA] ctb_arena_alloc_aligned: %llub allocated (%llub used) in arena %p\n", size, total, (void*)arena);
-			return ptr;
+			CTB_ARENA_DLOG("[arena] alloc size=%llu align=%llu used=%llu/%llu @%p\n",
+				  size, alignment, arena->offset, arena->capacity, (void*)user_ptr);
+			return (void*)user_ptr;
 		}
 		if (!arena->next)
 		{
-			arena->next = ctb_arena_create(size + arena->capacity);
-			if (!arena->next)
-			{
-				return 0;
-			}
-			arena->next->prev = arena;
+			if (header_size > ~0ULL - size)	{ return 0; }
+			unsigned long long grow = header_size + size;
+			if (alignment > ~0ULL - grow)	{ return 0; }
+			grow += alignment;
+
+			unsigned long long new_cap = (grow > arena->capacity) ? grow : arena->capacity;
+			if (!ctb_arena_extend(arena, new_cap)) { return 0; }
 		}
-		arena = arena->next;
 	}
 	return 0;
 }
 
-CTB_PUBLICDEF
-void *ctb_arena_alloc(ctb_arena *arena, U64 size)
+CTB_ARENA_DEF
+void* ctb_arena_alloc(struct ctb_arena* arena, unsigned long long size)
 {
-	return (ctb_arena_alloc_aligned(arena, size, CTB_DEFAULT_ALIGNMENT));
+	return ctb_arena_alloc_aligned(arena, size, CTB_ARENA_DEFAULT_ALIGNMENT);
 }
 
-CTB_PUBLICDEF
-void *ctb_arena_realloc(ctb_arena *arena, void *old_ptr, U64 new_size)
+CTB_ARENA_DEF
+void* ctb_arena_realloc(struct ctb_arena* arena, void* old_ptr, unsigned long long new_size)
 {
-	void *ptr = 0;
-	if (CTB_IS_BIT_SET(arena->flags, USE_HEADER))
-	{
-		ctb_arena_allocation_header header;
-		ptr = ctb_arena_alloc(arena, new_size);
-		ctb_arena_internal_memcpy(&header, (U8*)old_ptr - sizeof(header), sizeof(header));
-		ctb_arena_internal_memcpy(ptr, old_ptr, header.size);
-		ctb_arena_internal_memset((U8*)old_ptr - sizeof(header), 0, header.size + sizeof(header));
+	if (!arena || !old_ptr) return 0;
+	if ((arena->flags & CTB_ARENA_FLAG_USE_HEADER) == 0u) {
+		return ctb_arena_alloc(arena, new_size);
 	}
-	return ptr;
+	struct ctb_arena_allocation_header hdr;
+	CTB_ARENA_MEMCPY(&hdr,
+					 (unsigned char*)old_ptr - sizeof(struct ctb_arena_allocation_header),
+					 sizeof(struct ctb_arena_allocation_header));
+	unsigned long long copy_n = (hdr.size < new_size) ? hdr.size : new_size;
+	void* p = ctb_arena_alloc(arena, new_size);
+	if (!p) return 0;
+	CTB_ARENA_MEMCPY(p, old_ptr, copy_n);
+	CTB_ARENA_MEMSET((unsigned char*)old_ptr - sizeof(struct ctb_arena_allocation_header),
+					 0, hdr.size + sizeof(struct ctb_arena_allocation_header));
+	return p;
 }
 
-CTB_PUBLICDEF
-ctb_arena	*ctb_arena_reset(ctb_arena *arena)
+CTB_ARENA_DEF
+struct ctb_arena* ctb_arena_reset(struct ctb_arena* arena)
 {
-	ctb_arena *it = arena;
-	while (it)
-	{
-		it->offset = 0;
-		if (CTB_IS_BIT_SET(arena->flags, MEMSET_ON_RESET))
+	if (!arena) return 0;
+	struct ctb_arena* it = arena;
+	while (it->prev) it = it->prev;
+	for (; it; it = it->next) {
+		if (it->flags & CTB_ARENA_FLAG_MEMSET_ON_RESET)
 		{
-			ctb_arena_internal_memset(arena->memory, 0, arena->capacity);
+			CTB_ARENA_MEMSET(it->memory, 0, it->capacity);
 		}
-		it = it->next;
+		it->offset = 0;
 	}
 	return arena;
 }
 
-CTB_PUBLICDEF
-void ctb_arena_destroy(ctb_arena *arena)
+CTB_ARENA_DEF
+void ctb_arena_destroy(struct ctb_arena* arena)
 {
 	if (!arena) return;
-	ctb_arena *it = arena;
-	while (it && it->prev)
-	{
-		it = it->prev;
-	}
-	while (it)
-	{
-		ctb_arena *next = it->next;
-		free(it->memory);
-		it->prev = 0;
-		it->next = 0;
+	while (arena->prev) arena = arena->prev;
+	struct ctb_arena* it = arena;
+	while (it) {
+		struct ctb_arena* next = it->next;
+		if (it->memory) CTB_ARENA_FREE(it->memory);
+		it->memory = 0;
 		it->capacity = 0;
 		it->offset = 0;
-		CTB_INTERNALS_DEBUGPRINT("[ARENA] ctb_arena_destroy: Arena at %p destroyed\n", (void*)it);
-		free(it);
+		it->prev = 0;
+		it->next = 0;
+		CTB_ARENA_DLOG("[arena] destroy @%p\n", (void*)it);
+		CTB_ARENA_FREE(it);
 		it = next;
 	}
 }
 
-CTB_PUBLICDEF
-ctb_arena *ctb_arena_copy(const ctb_arena *source)
+CTB_ARENA_DEF
+struct ctb_arena* ctb_arena_copy(const struct ctb_arena* source)
 {
 	if (!source) return 0;
-	ctb_arena *copy = ctb_arena_create(source->capacity);
-	if (!copy) return 0;
-
-	copy->flags = source->flags;
-	copy->offset = source->offset;
-	ctb_arena_internal_memcpy(copy->memory, source->memory, source->offset);
-
-	const ctb_arena *src_it = source->next;
-	ctb_arena *dst_it = copy;
-
-	while (src_it)
-	{
-		ctb_arena *new_segment = ctb_arena_create(src_it->capacity);
-		if (!new_segment)
-		{
-			ctb_arena_destroy(copy);
-			return 0;
-		}
-		new_segment->flags = src_it->flags;
-		new_segment->offset = src_it->offset;
-		ctb_arena_internal_memcpy(new_segment->memory, src_it->memory, src_it->offset);
-
-		dst_it->next = new_segment;
-		new_segment->prev = dst_it;
-
-		src_it = src_it->next;
-		dst_it = new_segment;
+	while (source->prev) source = source->prev;
+	struct ctb_arena* head = ctb_arena_create(source->capacity);
+	if (!head) return 0;
+	head->flags = source->flags;
+	head->offset = source->offset;
+	CTB_ARENA_MEMCPY(head->memory, source->memory, source->offset);
+	const struct ctb_arena* s = source->next;
+	struct ctb_arena* d = head;
+	while (s) {
+		struct ctb_arena* seg = ctb_arena_create(s->capacity);
+		if (!seg) { ctb_arena_destroy(head); return 0; }
+		seg->flags = s->flags;
+		seg->offset = s->offset;
+		CTB_ARENA_MEMCPY(seg->memory, s->memory, s->offset);
+		d->next = seg; seg->prev = d;
+		d = seg; s = s->next;
 	}
-
-	CTB_INTERNALS_DEBUGPRINT("[ARENA] ctb_arena_copy: copied arena %p -> %p\n", (void*)source, (void*)copy);
-	return copy;
+	CTB_ARENA_DLOG("[arena] copy done\n");
+	return head;
 }
 
-CTB_PUBLICDEF
-U64 ctb_arena_internal_strlen(const char *cstr)
+CTB_ARENA_DEF
+unsigned long long ctb_arena_internal_strlen(const char* s)
 {
-	U64 len = 0;
-	while (cstr[len])
-	{
-		len++;
-	}
-	return len;
+	unsigned long long n = 0;
+	if (!s) return 0;
+	while (s[n]) n++;
+	return n;
 }
 
-CTB_PUBLICDEF
-void *ctb_arena_internal_memcpy(void *dest, const void *src, U64 size)
+CTB_ARENA_DEF
+void* ctb_arena_internal_memcpy(void* dst, const void* src, unsigned long long n)
 {
-	for (U64 i = 0; i < size; i++)
-	{
-		((U8*)(dest))[i] = ((U8*)(src))[i];
-	}
-	return dest;
+	unsigned long long i;
+	unsigned char* d = (unsigned char*)dst;
+	const unsigned char* s = (const unsigned char*)src;
+	for (i = 0; i < n; ++i) d[i] = s[i];
+	return dst;
 }
 
-CTB_PUBLICDEF
-void *ctb_arena_internal_memset(void *dest, U8 value, U64 size)
+CTB_ARENA_DEF
+void* ctb_arena_internal_memset(void* dst, int value, unsigned long long n)
 {
-	U8 *ptr = dest;
-	for (U64 i = 0; i < size; i++)
-	{
-		ptr[i] = value;
-	}
-	return dest;
+	unsigned long long i;
+	unsigned char* d = (unsigned char*)dst;
+	unsigned char v = (unsigned char)(value & 0xFF);
+	for (i = 0; i < n; ++i) d[i] = v;
+	return dst;
 }
 
-CTB_PUBLICDEF
-char *ctb_arena_strdup(ctb_arena *arena, const char *cstr)
+CTB_ARENA_DEF
+char* ctb_arena_strdup(struct ctb_arena* arena, const char* cstr)
 {
-	U64 len = ctb_arena_internal_strlen(cstr);
-	char *dup = (char*)ctb_arena_alloc(arena, len + 1);
-	ctb_arena_internal_memcpy(dup, cstr, len);
-	dup[len] = '\0';
-	return dup;
+	if (!arena || !cstr) return 0;
+	unsigned long long len = CTB_ARENA_STRLEN(cstr);
+	char* out = (char*)ctb_arena_alloc(arena, len + 1u);
+	if (!out) return 0;
+	CTB_ARENA_MEMCPY(out, cstr, len);
+	out[len] = '\0';
+	return out;
 }
 
-
-
-
-#endif	// NOTE: !CTB_ARENA_IMPLEMENTATION
-
-
+#endif /* CTB_ARENA_IMPLEMENTATION */
