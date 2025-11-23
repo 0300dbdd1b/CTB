@@ -5,17 +5,6 @@
 extern "C" {
 #endif
 
-/* ========================= Configuration =========================
-   Define before including:
-   - CTB_ARENA_STATIC            : make all functions static
-   - CTB_ARENA_DEBUG             : enable debug logs (stderr if libc, else no-op)
-   - CTB_ARENA_USE_LIBC          : use malloc/free/memcpy/memset/strlen
-   - CTB_ARENA_DEFAULT_ALIGNMENT : defaults to sizeof(void*)
-   - CTB_ARENA_DEFAULT_FLAGS     : defaults to (CTB_ARENA_FLAG_USE_HEADER)
-   - CTB_ARENA_MALLOC, CTB_ARENA_FREE,
-     CTB_ARENA_MEMCPY, CTB_ARENA_MEMSET, CTB_ARENA_STRLEN : custom hooks
-   ================================================================= */
-
 #if defined(CTB_ARENA_STATIC)
 #	define CTB_ARENA_DEC static
 #	define CTB_ARENA_DEF static
@@ -51,8 +40,7 @@ struct ctb_arena_allocation_header
 	unsigned long long	size;
 };
 
-CTB_ARENA_DEC void*				ctb_arena_alloc_aligned(struct ctb_arena* arena, unsigned long long size,
-														 unsigned long long alignment);
+CTB_ARENA_DEC void*				ctb_arena_alloc_aligned(struct ctb_arena* arena, unsigned long long size, unsigned long long alignment);
 CTB_ARENA_DEC void*				ctb_arena_alloc(struct ctb_arena* arena, unsigned long long size);
 CTB_ARENA_DEC void*				ctb_arena_realloc(struct ctb_arena* arena, void* old_ptr, unsigned long long new_size);
 CTB_ARENA_DEC struct ctb_arena*	ctb_arena_create(unsigned long long capacity);
@@ -62,21 +50,27 @@ CTB_ARENA_DEC void				ctb_arena_destroy(struct ctb_arena* arena);
 CTB_ARENA_DEC struct ctb_arena*	ctb_arena_copy(const struct ctb_arena* source);
 CTB_ARENA_DEC char*				ctb_arena_strdup(struct ctb_arena* arena, const char* cstr);
 
-/* Internal helpers are exposed so you can use the header without libc */
-CTB_ARENA_DEC void*				ctb_arena_internal_memcpy(void* dst, const void* src,
-														   unsigned long long n);
-CTB_ARENA_DEC void*				ctb_arena_internal_memset(void* dst, int value,
-														   unsigned long long n);
-CTB_ARENA_DEC unsigned long long	ctb_arena_internal_strlen(const char* s);
+#ifdef CTB_ARENA_NOPREFIX
+	#define arena_alloc_alligned	ctb_arena_alloc_aligned
+	#define arena_alloc				ctb_arena_alloc
+	#define arena_realloc			ctb_arena_realloc
+	#define arena_create			ctb_arena_create
+	#define arena_extend			ctb_arena_extend
+	#define arena_reset				ctb_arena_reset
+	#define arena_destroy			ctb_arena_destroy
+	#define arena_copy				ctb_arena_copy
+	#define arena_strdup			ctb_arena_strdup
+#endif
+
+CTB_ARENA_DEC void*					_ctb_arena_internal_memcpy(void* dst, const void* src, unsigned long long n);
+CTB_ARENA_DEC void*					_ctb_arena_internal_memset(void* dst, int value, unsigned long long n);
+CTB_ARENA_DEC unsigned long long	_ctb_arena_internal_strlen(const char* s);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 #endif /* _CTB_ARENA_H */
 
-/* ===================================================================== */
-/* ======================= Implementation Section ======================= */
-/* ===================================================================== */
 #ifdef CTB_ARENA_IMPLEMENTATION
 
 #ifndef CTB_ARENA_DEFAULT_ALIGNMENT
@@ -114,10 +108,10 @@ CTB_ARENA_DEC unsigned long long	ctb_arena_internal_strlen(const char* s);
 #		define CTB_ARENA_FREE(p)           ((void)0)
 #	endif
 #	ifndef CTB_ARENA_MEMCPY
-#		define CTB_ARENA_MEMCPY(d,s,n)     ctb_arena_internal_memcpy((d),(s),(n))
+#		define CTB_ARENA_MEMCPY(d,s,n)     _ctb_arena_internal_memcpy((d),(s),(n))
 #	endif
 #	ifndef CTB_ARENA_MEMSET
-#		define CTB_ARENA_MEMSET(d,v,n)     ctb_arena_internal_memset((d),(v),(n))
+#		define CTB_ARENA_MEMSET(d,v,n)     _ctb_arena_internal_memset((d),(v),(n))
 #	endif
 #	ifndef CTB_ARENA_STRLEN
 #		define CTB_ARENA_STRLEN(s)         ctb_arena_internal_strlen((s))
@@ -321,7 +315,7 @@ struct ctb_arena* ctb_arena_copy(const struct ctb_arena* source)
 }
 
 CTB_ARENA_DEF
-unsigned long long ctb_arena_internal_strlen(const char* s)
+unsigned long long _ctb_arena_internal_strlen(const char* s)
 {
 	unsigned long long n = 0;
 	if (!s) return 0;
@@ -330,7 +324,7 @@ unsigned long long ctb_arena_internal_strlen(const char* s)
 }
 
 CTB_ARENA_DEF
-void* ctb_arena_internal_memcpy(void* dst, const void* src, unsigned long long n)
+void* _ctb_arena_internal_memcpy(void* dst, const void* src, unsigned long long n)
 {
 	unsigned long long i;
 	unsigned char* d = (unsigned char*)dst;
@@ -340,7 +334,7 @@ void* ctb_arena_internal_memcpy(void* dst, const void* src, unsigned long long n
 }
 
 CTB_ARENA_DEF
-void* ctb_arena_internal_memset(void* dst, int value, unsigned long long n)
+void* _ctb_arena_internal_memset(void* dst, int value, unsigned long long n)
 {
 	unsigned long long i;
 	unsigned char* d = (unsigned char*)dst;
