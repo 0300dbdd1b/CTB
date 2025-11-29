@@ -114,7 +114,7 @@ CTB_ARENA_DEC unsigned long long	_ctb_arena_internal_strlen(const char* s);
 #		define CTB_ARENA_MEMSET(d,v,n)     _ctb_arena_internal_memset((d),(v),(n))
 #	endif
 #	ifndef CTB_ARENA_STRLEN
-#		define CTB_ARENA_STRLEN(s)         ctb_arena_internal_strlen((s))
+#		define CTB_ARENA_STRLEN(s)         _ctb_arena_internal_strlen((s))
 #	endif
 #endif
 
