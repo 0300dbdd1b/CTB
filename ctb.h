@@ -2,17 +2,30 @@
 #define _CTB_H
 
 #ifdef CTB_NOPREFIX
+	#define CTB_PLATFORM_NOPREFIX
+	#define CTB_MACROS_NOPREFIX
 	#define CTB_STRING_NOPREFIX
 	#define CTB_ARENA_NOPREFIX
+	#define CTB_DA_NOPREFIX
+	#define CTB_LOG_NOPREFIX
 #endif
 
 #ifdef CTB_IMPLEMENTATION
+	#define CTB_PLATFORM_IMPLEMENTATION
+	#define CTB_MACROS_IMPLEMENTATION
 	#define CTB_STRING_IMPLEMENTATION
 	#define CTB_ARENA_IMPLEMENTATION
+	#define CTB_DA_IMPLEMENTATION
+	#define CTB_LOG_IMPLEMENTATION
 #endif
 
+
+#include "ctb_platform.h"
+#include "ctb_macros.h"
 #include "ctb_types.h"
 #include "ctb_arena.h"
 #include "ctb_string.h"
+#include "ctb_da.h"
+#include "ctb_log.h"
 
 #endif
