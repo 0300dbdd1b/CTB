@@ -27,9 +27,9 @@ void ctb_sha1(char *hash_out, const char *str, uint32_t len);
 
 
 
-#ifdef CTB_ctb_sha1_IMPLEMENTATION
+#ifdef CTB_SHA1_IMPLEMENTATION
 
-#define ctb_sha1HANDSOFF
+#define CTB_SHA1_HANDSOFF
 
 #include <stdio.h>
 #include <string.h>
@@ -85,7 +85,7 @@ void ctb_sha1_transform(
         uint32_t l[16];
     } CHAR64LONG16;
 
-#ifdef ctb_sha1HANDSOFF
+#ifdef CTB_SHA1_HANDSOFF
     CHAR64LONG16 block[1];      /* use array to appear as a pointer */
 
     memcpy(block, buffer, 64);
@@ -192,7 +192,7 @@ void ctb_sha1_transform(
     state[4] += e;
     /* Wipe variables */
     a = b = c = d = e = 0;
-#ifdef ctb_sha1HANDSOFF
+#ifdef CTB_SHA1_HANDSOFF
     memset(block, '\0', sizeof(block));
 #endif
 }
