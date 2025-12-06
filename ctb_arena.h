@@ -1,10 +1,6 @@
 #ifndef _CTB_ARENA_H
 #define _CTB_ARENA_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(CTB_ARENA_STATIC)
 #	define CTB_ARENA_DEC static
 #	define CTB_ARENA_DEF static
@@ -66,10 +62,6 @@ CTB_ARENA_DEC void*					_ctb_arena_internal_memcpy(void* dst, const void* src, u
 CTB_ARENA_DEC void*					_ctb_arena_internal_memset(void* dst, int value, unsigned long long n);
 CTB_ARENA_DEC unsigned long long	_ctb_arena_internal_strlen(const char* s);
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-#endif /* _CTB_ARENA_H */
 
 #ifdef CTB_ARENA_IMPLEMENTATION
 
@@ -356,3 +348,6 @@ char* ctb_arena_strdup(struct ctb_arena* arena, const char* cstr)
 }
 
 #endif /* CTB_ARENA_IMPLEMENTATION */
+
+
+#endif /* _CTB_ARENA_H */

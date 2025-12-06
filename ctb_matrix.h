@@ -1,10 +1,6 @@
 #ifndef _CTB_MATRIX_H
 #define _CTB_MATRIX_H
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 
 #ifndef CTB_MATRIX_MALLOC
 	#include <stdlib.h>
@@ -304,9 +300,6 @@ CTB_MATRIX_DECL(f64)
         #define matrix_identity  ctb_matrix_identity
         #define matrix_zero      ctb_matrix_zero
     #endif
-#endif
-#ifdef __cplusplus
-}
 #endif
 
 #ifdef CTB_MATRIX_IMPLEMENTATION

@@ -122,18 +122,6 @@
 	#define CTB_HAS_FEATURE(x)	0
 #endif
 
-#define CTB_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
-
-#include <stddef.h>
-#define CTB_CONTAINER_OF(ptr, type, member) \
-    ((type *)((char *)(ptr) - offsetof(type, member)))
-
-/* Stringification */
-#define CTB_STRINGIFY_X(x) #x
-#define CTB_STRINGIFY(x) CTB_STRINGIFY_X(x)
-#define CTB_CONCAT_X(a, b) a##b
-#define CTB_CONCAT(a, b) CTB_CONCAT_X(a, b)
-
 
 /* ==========================================================================
  * 1. FUNCTION ATTRIBUTES
@@ -733,10 +721,6 @@
 	#define NO_STACK_PROT   CTB_NO_STACK_PROTECTOR
 	
     /* Helpers */
-	#define COUNTOF			CTB_COUNTOF
-	#define CONTAINER_OF	CTB_CONTAINER_OF
-	#define STRINGIFY		CTB_STRINGIFY
-	#define CONCAT			CTB_CONCAT
 
 #endif
 

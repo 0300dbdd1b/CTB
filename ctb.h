@@ -9,7 +9,9 @@
 	#define CTB_STRING_NOPREFIX
 	#define CTB_ARENA_NOPREFIX
 	#define CTB_DA_NOPREFIX
+	#define CTB_COLORS_NOPREFIX
 	#define CTB_LOG_NOPREFIX
+	#define CTB_HASH_NOPREFIX
 #endif
 
 #ifdef CTB_IMPLEMENTATION
@@ -20,7 +22,9 @@
 	#define CTB_STRING_IMPLEMENTATION
 	#define CTB_ARENA_IMPLEMENTATION
 	#define CTB_DA_IMPLEMENTATION
+	#define CTB_COLORS_IMPLEMENTATION
 	#define CTB_LOG_IMPLEMENTATION
+	#define CTB_HASH_IMPLEMENTATION
 #endif
 
 
@@ -30,6 +34,8 @@
 #include "ctb_string.h"
 #include "ctb_arena.h"
 #include "ctb_da.h"
+#include "ctb_colors.h"
 #include "ctb_log.h"
+#include "ctb_hash.h"
 
 #endif

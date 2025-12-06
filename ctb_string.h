@@ -58,7 +58,6 @@ CTB_STRING_DEC void			ctb_string_clear(ctb_string s);
 #ifdef __cplusplus
 }
 #endif
-#endif /* _CTB_STRING_H */
 
 
 #ifdef CTB_STRING_IMPLEMENTATION
@@ -198,3 +197,5 @@ void ctb_string_clear(ctb_string s)
 }
 
 #endif /* CTB_STRING_IMPLEMENTATION */
+
+#endif /* _CTB_STRING_H */

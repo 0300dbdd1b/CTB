@@ -1,9 +1,6 @@
 #ifndef _CTB_MACROS_H
 #define _CTB_MACROS_H
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
 
 #define CTB_KiB	(1024ULL)
 #define CTB_MiB	(1024ULL * CTB_KiB)
@@ -33,10 +30,14 @@
 #define CTB_IS			=
 
 #define CTB_FOREVER		for (;;)
+#define CTB_COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
+#include <stddef.h>
+#define CTB_CONTAINER_OF(ptr, type, member) ((type *)((char *)(ptr) - offsetof(type, member)))
+#define CTB_STRINGIFY_X(x) #x
+#define CTB_STRINGIFY(x) CTB_STRINGIFY_X(x)
+#define CTB_CONCAT_X(a, b) a##b
+#define CTB_CONCAT(a, b) CTB_CONCAT_X(a, b)
 
-
-#define CTB_COUNTOF(x)	(sizeof(x)/sizeof((x)[0]))
-#define CTB_UNUSED(x)	((void)(x))
 
 #ifdef CTB_MACROS_NOPREFIX
 	#define KiB		CTB_KiB
@@ -58,22 +59,18 @@
 	#define TOGGLE_BIT	CTB_TOGGLE_BIT
 	#define IS_BIT_SET	CTB_IS_BIT_SET
 
-	#define AND			CTB_AND
-	#define OR			CTB_OR
-	#define NOT			CTB_NOT
-	#define NOTEQUALS	CTB_NOTEQUALS
-	#define EQUALS		CTB_EQUALS
-	#define IS			CTB_IS
-	#define UNUSED		CTB_UNUSED
-	#define COUNTOF		CTB_COUNTOF
+	#define AND				CTB_AND
+	#define OR				CTB_OR
+	#define NOT				CTB_NOT
+	#define NOTEQUALS		CTB_NOTEQUALS
+	#define EQUALS			CTB_EQUALS
+	#define IS				CTB_IS
+	#define COUNTOF			CTB_COUNTOF
+	#define CONTAINER_OF	CTB_CONTAINER_OF
+	#define CONCAT			CTB_CONCAT
+	#define STRINGIFY		CTB_STRINGIFY
+
 #endif
-
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
-
 
 
 #endif // !_CTB_MACROS_H
