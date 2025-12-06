@@ -1,9 +1,6 @@
 #ifndef _CTB_COLORS_H
 #define _CTB_COLORS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #if defined(CTB_NO_COLORS)
     #define CTB_ANSI_RESET          ""
@@ -197,7 +194,4 @@ extern "C" {
     #define ENABLE_WINDOWS_ANSI CTB_ENABLE_WINDOWS_ANSI
 #endif
 
-#ifdef __cplusplus
-}
-#endif
 #endif /* _CTB_COLORS_H */

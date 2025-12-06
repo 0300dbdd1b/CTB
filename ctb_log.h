@@ -76,6 +76,7 @@ CTB_LOG_DEC void ctb_log_printf(int level, const char* fmt, ...);
 	#define log_msg			ctb_log
 #endif
 
+#endif /* _CTB_LOG_H */
 
 #ifdef CTB_LOG_IMPLEMENTATION
 
@@ -152,4 +153,3 @@ CTB_LOG_DEF void ctb_log_printf(int lvl, const char* fmt, ...)
 #endif /* CTB_LOG_IMPLEMENTATION */
 
 
-#endif /* _CTB_LOG_H */

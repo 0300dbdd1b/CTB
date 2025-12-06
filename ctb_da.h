@@ -25,7 +25,7 @@ _ctb_da_free_internal((void**)&((a)->data), &((a)->count), &((a)->capacity))
 
 #define ctb_da_full(a)		((a)->count >= (a)->capacity)
 #define ctb_da_clear(a)		((a)->count = 0)
-#define ctb_da_at(a, i)		((count > i) ? (a)->data[(a)->i] : (void*)0)
+#define ctb_da_at(a, i)		(((a)->count > i) ? (a)->data[(a)->i] : (void*)0)
 #define ctb_da_last(a)		((a)->data[(a)->count - 1])
 #define ctb_da_pop(a)		((a)->count > 0 ? (a)->count-- : 0)
 
@@ -55,6 +55,7 @@ CTB_DA_DEC void _ctb_da_free_internal(void** data, size_t* count, size_t* cap);
 	#define da_pop			ctb_da_pop
 #endif
 
+#endif /* _CTB_DA_H */
 
 #ifdef CTB_DA_IMPLEMENTATION
 
@@ -105,4 +106,3 @@ int _ctb_da_grow_internal(void** data, size_t* count, size_t* cap, size_t elem_s
 #endif /* CTB_DA_IMPLEMENTATION */
 
 
-#endif /* _CTB_DA_H */

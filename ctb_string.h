@@ -1,10 +1,6 @@
 #ifndef _CTB_STRING_H
 #define _CTB_STRING_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(CTB_STRING_STATIC)
 #  define CTB_STRING_DEC static
 #  define CTB_STRING_DEF static
@@ -55,10 +51,8 @@ CTB_STRING_DEC void			ctb_string_clear(ctb_string s);
 	#define string_clear		ctb_string_clear
 #endif
 
-#ifdef __cplusplus
-}
-#endif
 
+#endif /* _CTB_STRING_H */
 
 #ifdef CTB_STRING_IMPLEMENTATION
 
@@ -198,4 +192,3 @@ void ctb_string_clear(ctb_string s)
 
 #endif /* CTB_STRING_IMPLEMENTATION */
 
-#endif /* _CTB_STRING_H */

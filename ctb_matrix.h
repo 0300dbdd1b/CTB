@@ -301,6 +301,7 @@ CTB_MATRIX_DECL(f64)
         #define matrix_zero      ctb_matrix_zero
     #endif
 #endif
+#endif /* _CTB_MATRIX_H */
 
 #ifdef CTB_MATRIX_IMPLEMENTATION
 
@@ -319,4 +320,3 @@ CTB_MATRIX_DECL(f64)
 
 #endif /* CTB_MATRIX_IMPLEMENTATION */
 
-#endif /* _CTB_MATRIX_H */

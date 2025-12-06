@@ -292,7 +292,7 @@ typedef ctb_hmac_sha512_ctx	hmac_sha512_ctx;
 /* PBKDF2 */
 #define pbkdf2_hmac_sha224 ctb_pbkdf2_hmac_sha224
 #define pbkdf2_hmac_sha256 ctb_pbkdf2_hmac_sha256
-#define pbkdf2_hmac_sha384 ctb_pbkdf2_hmac_sha394
+#define pbkdf2_hmac_sha384 ctb_pbkdf2_hmac_sha384
 #define pbkdf2_hmac_sha512 ctb_pbkdf2_hmac_sha512
 
 #endif
@@ -2187,11 +2187,11 @@ for (uint32_t i = 1; i <= blocks; ++i) {            \
 	}                                               \
 	\
 	size_t take = (out_len - off < hLen) ? (out_len - off) : hLen; \
-	memcpy(out + off, T, take);                     \
+	memcpy(out + off, T, take);											\
 	off += take;                                    \
 }                                                   \
 \
-/* wipe & free */                                    \
+/* wipe & free */                                   \
 if (U) { memset(U, 0, hLen); free(U); }             \
 if (T) { memset(T, 0, hLen); free(T); }             \
 if (salt_cnt) { memset(salt_cnt, 0, salt_len + 4); free(salt_cnt); } \

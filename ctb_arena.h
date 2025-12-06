@@ -62,6 +62,8 @@ CTB_ARENA_DEC void*					_ctb_arena_internal_memcpy(void* dst, const void* src, u
 CTB_ARENA_DEC void*					_ctb_arena_internal_memset(void* dst, int value, unsigned long long n);
 CTB_ARENA_DEC unsigned long long	_ctb_arena_internal_strlen(const char* s);
 
+#endif /* _CTB_ARENA_H */
+
 
 #ifdef CTB_ARENA_IMPLEMENTATION
 
@@ -350,4 +352,3 @@ char* ctb_arena_strdup(struct ctb_arena* arena, const char* cstr)
 #endif /* CTB_ARENA_IMPLEMENTATION */
 
 
-#endif /* _CTB_ARENA_H */
