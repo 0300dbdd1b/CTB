@@ -123,31 +123,32 @@ CTB_LOG_DEF void ctb_log_disable(unsigned int flags)
 
 CTB_LOG_DEF void ctb_log_printf(int lvl, const char* fmt, ...)
 {
-	if (lvl != CTB_LOG_NONE && !(_ctb_log_mask & lvl)) return;
+    if (lvl != CTB_LOG_NONE && !(_ctb_log_mask & lvl)) return;
 
-	va_list args;
-	va_start(args, fmt);
+    va_list args;
+    va_start(args, fmt);
 
-	const char* color = _ctb_log_get_color(lvl);
+    const char* color = _ctb_log_get_color(lvl);
+    FILE* out = (lvl >= CTB_LOG_WARN) ? stderr : stdout;
 
-	if (lvl == CTB_LOG_NONE)
-	{
-		vprintf(fmt, args);
-		printf(_CTB_COLOR_RESET "\n");
-	}
-	else if (lvl == CTB_LOG_CMD)
-	{
-		printf("%s[%s]: %s", color, _ctb_log_get_name(lvl), _CTB_COLOR_RESET);
-		vprintf(fmt, args);
-		printf(_CTB_COLOR_RESET "\n");
-	}
-	else
-	{
-		printf("%s[%s]: ", color, _ctb_log_get_name(lvl));
-		vprintf(fmt, args);
-		printf(_CTB_COLOR_RESET "\n");
-	}
-	va_end(args);
+    if (lvl == CTB_LOG_NONE)
+    {
+        vfprintf(out, fmt, args);
+        fprintf(out, _CTB_COLOR_RESET "\n");
+    }
+    else if (lvl == CTB_LOG_CMD)
+    {
+        fprintf(out, "%s[%s]: %s", color, _ctb_log_get_name(lvl), _CTB_COLOR_RESET);
+        vfprintf(out, fmt, args);
+        fprintf(out, _CTB_COLOR_RESET "\n");
+    }
+    else
+    {
+        fprintf(out, "%s[%s]: ", color, _ctb_log_get_name(lvl));
+        vfprintf(out, fmt, args);
+        fprintf(out, _CTB_COLOR_RESET "\n");
+    }
+    va_end(args);
 }
 
 #endif /* CTB_LOG_IMPLEMENTATION */

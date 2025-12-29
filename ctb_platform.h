@@ -599,6 +599,14 @@
     #define LITTLE_ENDIAN	CTB_LITTLE_ENDIAN
 	#define BIG_ENDIAN		CTB_BIG_ENDIAN
 
+
+    #define C_VERSION       CTB_C_VERSION
+    #define C89             CTB_C89
+    #define C99             CTB_C99
+    #define C11             CTB_C11
+    #define C17             CTB_C17
+    #define C23             CTB_C23
+
     /* Feature Checks */
 	#define HAS_INCLUDE		CTB_HAS_INCLUDE
 	#define HAS_ATTRIBUTE	CTB_HAS_ATTRIBUTE
